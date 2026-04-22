@@ -256,9 +256,15 @@ async function saveProduct() {
 }
 
 async function deleteProduct(id) {
-  if (!confirm('¿Eliminar producto?')) return;
-  await secureFetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
-  fetchData();
+  if (!confirm('¿Eliminar producto de forma permanente?')) return;
+  try {
+    const res = await secureFetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Error en el servidor');
+    showToast('Producto borrado');
+    fetchData();
+  } catch(e) {
+    showToast('Error al borrar producto');
+  }
 }
 
 function openMovement(preId) {

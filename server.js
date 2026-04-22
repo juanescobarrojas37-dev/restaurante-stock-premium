@@ -142,11 +142,22 @@ app.put('/api/products/:id', authenticateToken, (req, res) => {
 });
 
 app.delete('/api/products/:id', authenticateToken, (req, res) => {
-  const { id } = req.params;
-  const product = db.prepare('SELECT nombre FROM products WHERE id = ?').get(id);
-  db.prepare('DELETE FROM products WHERE id=?').run(id);
-  logActivity(req.user.id, req.user.username, 'Eliminar Producto', `Borró: ${product ? product.nombre : id}`);
-  res.json({ success: true });
+  try {
+    const { id } = req.params;
+    const product = db.prepare('SELECT nombre FROM products WHERE id = ?').get(id);
+    
+    // Primero, para que sea seguro, borramos el historial de movimientos de este producto
+    db.prepare('DELETE FROM movements WHERE product_id=?').run(id);
+    
+    // Luego borramos el producto principal
+    db.prepare('DELETE FROM products WHERE id=?').run(id);
+    
+    logActivity(req.user.id, req.user.username, 'Eliminar Producto', `Borró: ${product ? product.nombre : id}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error al borrar producto:', err);
+    res.status(500).json({ error: 'No se pudo eliminar el producto' });
+  }
 });
 
 // Settings
