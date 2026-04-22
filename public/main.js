@@ -1,6 +1,6 @@
 // ── CONFIG ────────────────────────────────────────────────────────────────
 const API_URL = '/api';
-let AUTH_TOKEN = localStorage.getItem('auth_token');
+let AUTH_TOKEN = sessionStorage.getItem('auth_token');
 
 // ── ESTADO ────────────────────────────────────────────────────────────────
 let products = [];
@@ -17,7 +17,7 @@ function checkAuth() {
     loginScreen.style.display = 'flex';
   } else {
     loginScreen.style.display = 'none';
-    const user = JSON.parse(localStorage.getItem('user_data') || '{}');
+    const user = JSON.parse(sessionStorage.getItem('user_data') || '{}');
     document.getElementById('user-display').textContent = user.username || 'Admin';
     fetchData();
   }
@@ -37,11 +37,17 @@ async function handleLogin(e) {
     });
     
     if (res.ok) {
-      const data = await res.json();
-      AUTH_TOKEN = data.token;
-      localStorage.setItem('auth_token', data.token);
-      localStorage.setItem('user_data', JSON.stringify(data.user));
-      checkAuth();
+        const data = await res.json();
+        AUTH_TOKEN = data.token;
+        sessionStorage.setItem('auth_token', data.token);
+        sessionStorage.setItem('user_data', JSON.stringify(data.user));
+        
+        // Limpiamos los campos del formulario por si se cierra la sesión
+        document.getElementById('login-user').value = '';
+        document.getElementById('login-pass').value = '';
+        errorEl.style.display = 'none';
+        
+        checkAuth();
     } else {
       errorEl.textContent = 'Usuario o contraseña incorrectos';
       errorEl.style.display = 'block';
@@ -53,8 +59,8 @@ async function handleLogin(e) {
 }
 
 function logout() {
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('user_data');
+  sessionStorage.removeItem('auth_token');
+  sessionStorage.removeItem('user_data');
   location.reload();
 }
 
