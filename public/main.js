@@ -164,7 +164,7 @@ function renderTable() {
       <td>
         <button class="btn sm" onclick="openEditProduct(${p.id})">Editar</button>
         <button class="btn sm" onclick="openMovement(${p.id})">Mover</button>
-        <button class="btn sm danger" onclick="deleteProduct(${p.id})">✕</button>
+        <button class="btn sm danger" onclick="deleteProduct(${p.id})">Borrar</button>
       </td>
     </tr>`;
   }).join('');
