@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RestaurantStock — Inventario Premium</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="layout">
+  <!-- ── SIDEBAR ─────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>
+      </div>
+      <span>RestaurantStock</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('inventario',this)">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Inventario
+      </button>
+      <button class="nav-item" onclick="showPage('alertas',this)">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Alertas
+        <span class="nav-badge" id="badge-alertas">0</span>
+      </button>
+      <button class="nav-item" onclick="showPage('movimientos',this)">
+        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"/><polyline points="17 3 17 8 12 8"/></svg>
+        Movimientos
+      </button>
+      <button class="nav-item" onclick="showPage('reportes',this)">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reportes
+      </button>
+      <button class="nav-item" onclick="showPage('ajustes',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Ajustes
+      </button>
+    </nav>
+    <div class="sidebar-footer">v1.1 &copy; 2026 · DB Connected</div>
+  </aside>
+
+  <!-- ── MAIN ────────────────────────────────────────────────────── -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="page-title">Inventario</h1>
+        <div class="sub" id="page-sub">Gestiona todos tus insumos</div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn primary" id="btn-action" onclick="openAddProduct()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar producto
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Métricas -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="m-label">Total productos</div>
+          <div class="m-val m-dark" id="m-total">0</div>
+          <div class="m-sub">en inventario</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">Valor del stock</div>
+          <div class="m-val m-green" id="m-valor">$0</div>
+          <div class="m-sub">valorización actual</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">Stock bajo</div>
+          <div class="m-val m-amber" id="m-warn">0</div>
+          <div class="m-sub">requieren reposición</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">Sin stock</div>
+          <div class="m-val m-red" id="m-crit">0</div>
+          <div class="m-sub">productos agotados</div>
+        </div>
+      </div>
+
+      <!-- INVENTARIO -->
+      <div class="page active" id="page-inventario">
+        <div class="card">
+          <div class="card-header">
+            <h2>Productos</h2>
+            <select id="cat-filter" onchange="renderTable()">
+              <option value="">Todas las categorías</option>
+              <option>Carnes</option><option>Lácteos</option><option>Verduras</option>
+              <option>Bebidas</option><option>Granos</option><option>Especias</option><option>Otros</option>
+            </select>
+          </div>
+          <div class="filter-bar">
+            <input type="text" id="search" placeholder="Buscar producto..." oninput="renderTable()">
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Categoría</th>
+                  <th>Stock</th>
+                  <th>Mínimo</th>
+                  <th>Nivel</th>
+                  <th>Valor unit.</th>
+                  <th>Valor total</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALERTAS -->
+      <div class="page" id="page-alertas">
+        <div class="card">
+          <div class="card-header"><h2>Alertas de stock</h2></div>
+          <div id="alert-list"></div>
+        </div>
+      </div>
+
+      <!-- MOVIMIENTOS -->
+      <div class="page" id="page-movimientos">
+        <div class="card">
+          <div class="card-header"><h2>Historial de movimientos</h2></div>
+          <div id="mv-list"></div>
+        </div>
+      </div>
+
+      <!-- REPORTES -->
+      <div class="page" id="page-reportes">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+          <div class="card">
+            <div class="card-header"><h2>Valor por categoría</h2></div>
+            <div class="card-body" id="report-cats"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>Productos críticos</h2></div>
+            <div id="report-criticos"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Resumen del inventario</h2></div>
+          <div class="card-body" id="report-summary"></div>
+        </div>
+      </div>
+
+      <!-- AJUSTES -->
+      <div class="page" id="page-ajustes">
+        <div class="card">
+          <div class="card-header"><h2>Configuración del Sistema</h2></div>
+          <div class="card-body" style="max-width: 600px;">
+            <div class="field">
+              <label>URL Webhook de n8n</label>
+              <input type="text" id="set-n8n-url" placeholder="https://tu-instancia.n8n.cloud/webhook/...">
+              <p class="td-muted" style="font-size: 11px; margin-top: 5px;">
+                Esta URL recibirá los registros de movimientos en tiempo real para sincronizar con Google Sheets.
+              </p>
+            </div>
+            <div class="field">
+              <label>Nombre de la Aplicación</label>
+              <input type="text" id="set-app-name" placeholder="Ej: Mi Restaurante Stock">
+            </div>
+            <div style="margin-top: 24px;">
+              <button class="btn primary" onclick="saveSettings()">Guardar Cambios</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>Estado de Integración</h2></div>
+          <div class="card-body">
+            <div id="n8n-status" class="alert-item" style="border:none; padding:0;">
+              <div class="alert-dot dot-warn">!</div>
+              <div class="alert-info">
+                <div class="a-title">Conexión con n8n</div>
+                <div class="a-desc" id="n8n-desc">Introduce una URL válida para activar la sincronización automática.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL: Producto -->
+<div class="modal-bg" id="modal-product">
+  <div class="modal">
+    <h3 id="modal-title">Agregar producto</h3>
+    <div class="field">
+      <label>Nombre del producto</label>
+      <input id="f-nombre" placeholder="Ej: Pechuga de pollo">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Categoría</label>
+        <select id="f-cat">
+          <option>Carnes</option><option>Lácteos</option><option>Verduras</option>
+          <option>Bebidas</option><option>Granos</option><option>Especias</option><option>Otros</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Unidad</label>
+        <select id="f-unit">
+          <option>kg</option><option>litros</option><option>unidades</option>
+          <option>cajas</option><option>gramos</option><option>porciones</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Stock actual</label>
+        <input id="f-stock" type="number" min="0" placeholder="0">
+      </div>
+      <div class="field">
+        <label>Stock mínimo</label>
+        <input id="f-min" type="number" min="0" placeholder="5">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Valor unitario ($)</label>
+        <input id="f-valor" type="number" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="field">
+        <label>Proveedor (opcional)</label>
+        <input id="f-prov" placeholder="Nombre proveedor">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-product')">Cancelar</button>
+      <button class="btn primary" onclick="saveProduct()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Movimiento -->
+<div class="modal-bg" id="modal-mv">
+  <div class="modal">
+    <h3>Registrar movimiento</h3>
+    <div class="field">
+      <label>Producto</label>
+      <select id="mv-prod"></select>
+    </div>
+    <div class="field">
+      <label>Tipo de movimiento</label>
+      <select id="mv-tipo">
+        <option value="in">Entrada</option>
+        <option value="out">Salida</option>
+        <option value="adj">Ajuste</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Cantidad</label>
+        <input id="mv-qty" type="number" min="0" step="0.01" placeholder="0">
+      </div>
+      <div class="field">
+        <label>Responsable</label>
+        <input id="mv-resp" placeholder="Nombre">
+      </div>
+    </div>
+    <div class="field">
+      <label>Nota (opcional)</label>
+      <input id="mv-nota" placeholder="Motivo...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('modal-mv')">Cancelar</button>
+      <button class="btn primary" onclick="saveMovement()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="main.js"></script>
+</body>
+</html>
