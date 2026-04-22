@@ -1,0 +1,17 @@
+{
+  "name": "Las Margaritas Inventario",
+  "short_name": "Inventario",
+  "description": "Sistema Premium de Control de Stock",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F4F0",
+  "theme_color": "#0F6E56",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3218/3218556.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
