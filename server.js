@@ -2,17 +2,17 @@ const express = require('express');
 const Database = require('better-sqlite3');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-console.log('Starting server...');
+console.log('Starting secured server...');
 const app = express();
-const port = 3000;
-console.log('Connecting to database...');
-const db = new Database('inventory.db');
-console.log('Database connected.');
+const port = process.env.PORT || 3000;
+const dbPath = process.env.DB_PATH || 'inventory.db';
+const JWT_SECRET = process.env.JWT_SECRET || 'secret_key_restaurant_2026';
 
-// ── CONFIGURACIÓN N8N ────────────────────────────────────────────────────────
-// Reemplaza esta URL con la que te proporcione tu nodo Webhook en n8n
-const N8N_WEBHOOK_URL = 'http://REEMPLAZAR_CON_TU_URL_DE_N8N';
+const db = new Database(dbPath);
+console.log('Database connected.');
 
 app.use(cors());
 app.use(express.json());
@@ -22,6 +22,13 @@ console.log('Setting up tables...');
 
 // ── DATABASE SETUP ──────────────────────────────────────────────────────────
 db.exec(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    role TEXT
+  );
+
   CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nombre TEXT NOT NULL,
@@ -45,6 +52,15 @@ db.exec(`
     FOREIGN KEY(product_id) REFERENCES products(id)
   );
 
+  CREATE TABLE IF NOT EXISTS audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    username TEXT,
+    action TEXT,
+    details TEXT,
+    fecha TEXT
+  );
+
   CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT
@@ -56,50 +72,80 @@ const initSettings = db.prepare('INSERT OR IGNORE INTO settings (key, value) VAL
 initSettings.run('n8n_webhook_url', '');
 initSettings.run('app_name', 'BOND Stock');
 
-// Seed initial data if empty
-const count = db.prepare('SELECT COUNT(*) as count FROM products').get();
-if (count.count === 0) {
-  const initialProducts = [
-    ["Pechuga de pollo", "Carnes", 12, 5, "kg", 4.5, "Avícola Sur"],
-    ["Carne molida", "Carnes", 3, 6, "kg", 5.2, "Avícola Sur"],
-    ["Leche entera", "Lácteos", 20, 10, "litros", 0.9, ""],
-    ["Queso mantecoso", "Lácteos", 0, 3, "kg", 8.0, "Lácteos del Sur"],
-    ["Tomate", "Verduras", 8, 5, "kg", 1.1, ""],
-    ["Lechuga", "Verduras", 4, 6, "unidades", 0.5, ""],
-    ["Coca-Cola 2L", "Bebidas", 24, 12, "unidades", 1.8, "Distribuidora Norte"],
-    ["Arroz grano largo", "Granos", 15, 10, "kg", 0.7, ""],
-    ["Sal fina", "Especias", 2, 4, "kg", 0.4, ""]
-  ];
-  const insertProd = db.prepare('INSERT INTO products (nombre, cat, stock, min, unit, valor, prov) VALUES (?, ?, ?, ?, ?, ?, ?)');
-  initialProducts.forEach(p => insertProd.run(p));
+// Crear usuario administrador por defecto si no existe (admin / admin123)
+const adminExists = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
+if (!adminExists) {
+  const hashedPassword = bcrypt.hashSync('admin123', 10);
+  db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)')
+    .run('admin', hashedPassword, 'admin');
 }
 
-// ── API ENDPOINTS ────────────────────────────────────────────────────────────
+// Helper: Registrar actividad
+function logActivity(userId, username, action, details) {
+  const fecha = new Date().toLocaleString('es-CL');
+  db.prepare('INSERT INTO audit_logs (user_id, username, action, details, fecha) VALUES (?, ?, ?, ?, ?)')
+    .run(userId, username, action, details, fecha);
+}
+
+// ── AUTH MIDDLEWARE ──────────────────────────────────────────────────────────
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
+
+// ── AUTH ENDPOINTS ────────────────────────────────────────────────────────────
+
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+
+  if (!user || !bcrypt.compareSync(password, user.password)) {
+    return res.status(401).json({ message: 'Credenciales inválidas' });
+  }
+
+  const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '24h' });
+  logActivity(user.id, user.username, 'Login', 'Usuario ingresó al sistema');
+  res.json({ token, user: { username: user.username, role: user.role } });
+});
+
+// ── API ENDPOINTS (PROTECTED) ────────────────────────────────────────────────
 
 // Products
-app.get('/api/products', (req, res) => {
+app.get('/api/products', authenticateToken, (req, res) => {
   const products = db.prepare('SELECT * FROM products').all();
   res.json(products);
 });
 
-app.post('/api/products', (req, res) => {
+app.post('/api/products', authenticateToken, (req, res) => {
   const { nombre, cat, stock, min, unit, valor, prov } = req.body;
   const info = db.prepare('INSERT INTO products (nombre, cat, stock, min, unit, valor, prov) VALUES (?, ?, ?, ?, ?, ?, ?)')
     .run(nombre, cat, stock, min, unit, valor, prov);
+  logActivity(req.user.id, req.user.username, 'Agregar Producto', `Creó: ${nombre}`);
   res.json({ id: info.lastInsertRowid });
 });
 
-app.put('/api/products/:id', (req, res) => {
+app.put('/api/products/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
   const { nombre, cat, stock, min, unit, valor, prov } = req.body;
   db.prepare('UPDATE products SET nombre=?, cat=?, stock=?, min=?, unit=?, valor=?, prov=? WHERE id=?')
     .run(nombre, cat, stock, min, unit, valor, prov, id);
+  logActivity(req.user.id, req.user.username, 'Editar Producto', `Editó: ${nombre} (ID: ${id})`);
   res.json({ success: true });
 });
 
-app.delete('/api/products/:id', (req, res) => {
+app.delete('/api/products/:id', authenticateToken, (req, res) => {
   const { id } = req.params;
+  const product = db.prepare('SELECT nombre FROM products WHERE id = ?').get(id);
   db.prepare('DELETE FROM products WHERE id=?').run(id);
+  logActivity(req.user.id, req.user.username, 'Eliminar Producto', `Borró: ${product ? product.nombre : id}`);
   res.json({ success: true });
 });
 
@@ -113,7 +159,7 @@ app.get('/api/settings', (req, res) => {
   res.json(settingsMap);
 });
 
-app.post('/api/settings', (req, res) => {
+app.post('/api/settings', authenticateToken, (req, res) => {
   const settings = req.body;
   const updateSetting = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)');
   
@@ -124,25 +170,29 @@ app.post('/api/settings', (req, res) => {
   });
 
   transaction(settings);
+  logActivity(req.user.id, req.user.username, 'Ajustes', 'Actualizó configuración del sistema');
   res.json({ success: true });
 });
 
+// Audit Logs
+app.get('/api/audit', authenticateToken, (req, res) => {
+  const logs = db.prepare('SELECT * FROM audit_logs ORDER BY id DESC LIMIT 200').all();
+  res.json(logs);
+});
+
 // Movements
-app.get('/api/movements', (req, res) => {
+app.get('/api/movements', authenticateToken, (req, res) => {
   const movements = db.prepare('SELECT * FROM movements ORDER BY id DESC').all();
   res.json(movements);
 });
 
-app.post('/api/movements', (req, res) => {
+app.post('/api/movements', authenticateToken, (req, res) => {
   const { product_id, prod_nombre, tipo, qty, nota, resp, fecha } = req.body;
   
-  // Start transaction
   const transaction = db.transaction(() => {
-    // Insert movement
     db.prepare('INSERT INTO movements (product_id, prod_nombre, tipo, qty, nota, resp, fecha) VALUES (?, ?, ?, ?, ?, ?, ?)')
       .run(product_id, prod_nombre, tipo, qty, nota, resp, fecha);
     
-    // Update product stock
     const product = db.prepare('SELECT stock FROM products WHERE id=?').get(product_id);
     let newStock = product.stock;
     if (tipo === 'in') newStock += qty;
@@ -154,8 +204,9 @@ app.post('/api/movements', (req, res) => {
   });
 
   const newStock = transaction();
+  logActivity(req.user.id, req.user.username, 'Movimiento', `${tipo.toUpperCase()}: ${prod_nombre} (${qty})`);
 
-  // ENVÍO A N8N (En segundo plano para no ralentizar la app)
+  // ENVÍO A N8N
   const settings = db.prepare('SELECT value FROM settings WHERE key = ?').get('n8n_webhook_url');
   const n8nUrl = settings ? settings.value : null;
 
@@ -170,6 +221,7 @@ app.post('/api/movements', (req, res) => {
         cantidad: qty,
         nota: nota || '',
         responsable: resp || '',
+        usuario_sistema: req.user.username,
         fecha: fecha,
         stock_resultante: newStock
       })

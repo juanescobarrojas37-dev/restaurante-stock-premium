@@ -31,16 +31,23 @@
         <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"/><polyline points="17 3 17 8 12 8"/></svg>
         Movimientos
       </button>
-      <button class="nav-item" onclick="showPage('reportes',this)">
+        <button class="nav-item" onclick="showPage('reportes',this)">
         <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         Reportes
+      </button>
+      <button class="nav-item" onclick="showPage('auditoria',this)">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Auditoría
       </button>
       <button class="nav-item" onclick="showPage('ajustes',this)">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Ajustes
       </button>
     </nav>
-    <div class="sidebar-footer">v1.1 &copy; 2026 · DB Connected</div>
+    <div class="sidebar-footer">
+      <div id="user-display" style="color:white; font-weight:600; margin-bottom:8px">Admin</div>
+      <button class="btn sm danger" onclick="logout()" style="width:100%; justify-content:center">Cerrar Sesión</button>
+    </div>
   </aside>
 
   <!-- ── MAIN ────────────────────────────────────────────────────── -->
@@ -149,6 +156,26 @@
         <div class="card">
           <div class="card-header"><h2>Resumen del inventario</h2></div>
           <div class="card-body" id="report-summary"></div>
+        </div>
+      </div>
+
+      <!-- AUDITORÍA -->
+      <div class="page" id="page-auditoria">
+        <div class="card">
+          <div class="card-header"><h2>Registro de Actividad Permanente</h2></div>
+          <div class="tbl-wrap">
+            <table id="audit-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Usuario</th>
+                  <th>Acción</th>
+                  <th>Detalles</th>
+                </tr>
+              </thead>
+              <tbody id="audit-body"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -276,6 +303,31 @@
       <button class="btn" onclick="closeModal('modal-mv')">Cancelar</button>
       <button class="btn primary" onclick="saveMovement()">Registrar</button>
     </div>
+  </div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-screen" style="position:fixed; inset:0; background:var(--bg-main); z-index:9000; display:flex; align-items:center; justify-content:center;">
+  <div class="card" style="width:360px; padding:32px; box-shadow:var(--shadow-lg);">
+    <div style="text-align:center; margin-bottom:24px;">
+      <div class="sidebar-logo" style="justify-content:center; padding:0; border:none; margin-bottom:12px;">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      </div>
+      <h2 style="font-size:20px; font-weight:800;">Iniciar Sesión</h2>
+      <p style="font-size:13px; color:var(--text-muted);">Ingresa tus credenciales para continuar</p>
+    </div>
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" id="login-user" required placeholder="admin">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn primary" style="width:100%; justify-content:center; margin-top:16px; padding:12px;">Acceder al Sistema</button>
+    </form>
+    <p id="login-error" style="color:var(--red-primary); font-size:12px; margin-top:12px; text-align:center; display:none;"></p>
   </div>
 </div>
 
