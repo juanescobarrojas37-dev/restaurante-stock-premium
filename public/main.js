@@ -25,7 +25,7 @@ function checkAuth() {
 
 async function handleLogin(e) {
   e.preventDefault();
-  const username = document.getElementById('login-user').value;
+  const username = document.getElementById('login-user').value.toLowerCase().trim();
   const password = document.getElementById('login-pass').value;
   const errorEl = document.getElementById('login-error');
   
