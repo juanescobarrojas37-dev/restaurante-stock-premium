@@ -72,12 +72,12 @@ const initSettings = db.prepare('INSERT OR IGNORE INTO settings (key, value) VAL
 initSettings.run('n8n_webhook_url', '');
 initSettings.run('app_name', 'BOND Stock');
 
-// Crear usuario administrador por defecto si no existe (admin / admin123)
-const adminExists = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
+// Crear usuario administrador por defecto si no existe (gaelguapo500@gmail.com / 123456#)
+const adminExists = db.prepare('SELECT * FROM users WHERE username = ?').get('gaelguapo500@gmail.com');
 if (!adminExists) {
-  const hashedPassword = bcrypt.hashSync('admin123', 10);
+  const hashedPassword = bcrypt.hashSync('123456#', 10);
   db.prepare('INSERT INTO users (username, password, role) VALUES (?, ?, ?)')
-    .run('admin', hashedPassword, 'admin');
+    .run('gaelguapo500@gmail.com', hashedPassword, 'admin');
 }
 
 // Helper: Registrar actividad
