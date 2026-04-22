@@ -70,7 +70,7 @@ db.exec(`
 // Inicializar ajustes por defecto
 const initSettings = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 initSettings.run('n8n_webhook_url', '');
-initSettings.run('app_name', 'BOND Stock');
+initSettings.run('app_name', 'Las Margaritas');
 
 // Crear usuario administrador por defecto si no existe (gaelguapo500@gmail.com / 123456#)
 const adminExists = db.prepare('SELECT * FROM users WHERE username = ?').get('gaelguapo500@gmail.com');

@@ -6,7 +6,7 @@ let AUTH_TOKEN = localStorage.getItem('auth_token');
 let products = [];
 let movements = [];
 let auditLogs = [];
-let settings  = { n8n_webhook_url: '', app_name: 'BOND Stock' };
+let settings  = { n8n_webhook_url: '', app_name: 'Las Margaritas' };
 let editId = null;
 let currentPage = 'inventario';
 
@@ -299,7 +299,7 @@ function fillSettingsForm() {
   const urlEl = document.getElementById('set-n8n-url');
   const nameEl = document.getElementById('set-app-name');
   if (urlEl) urlEl.value = settings.n8n_webhook_url || '';
-  if (nameEl) nameEl.value = settings.app_name || 'BOND Stock';
+  if (nameEl) nameEl.value = settings.app_name || 'Las Margaritas';
 }
 
 async function saveSettings() {
