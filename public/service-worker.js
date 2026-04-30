@@ -1,4 +1,4 @@
-const CACHE_NAME = 'margaritas-stock-v1';
+const CACHE_NAME = 'las-rositas-stock-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,11 +7,26 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Force new service worker to take over
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
         return cache.addAll(urlsToCache);
       })
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim()) // claim clients immediately
   );
 });
 
@@ -22,24 +37,20 @@ self.addEventListener('fetch', event => {
   }
   
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        if (response) {
-          return response; // Devuelve del cache
+        // Actualiza el cache si la petición de red fue exitosa
+        if(response && response.status === 200 && response.type === 'basic') {
+          let responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
         }
-        return fetch(event.request).then(
-          function(response) {
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            var responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);
-              });
-            return response;
-          }
-        );
+        return response;
+      })
+      .catch(() => {
+        // Si falla la red, busca en el cache (Offline mode)
+        return caches.match(event.request);
       })
   );
 });

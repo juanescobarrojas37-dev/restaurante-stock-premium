@@ -69,7 +69,7 @@ db.exec(`
 
 // Inicializar ajustes por defecto
 const initSettings = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
-initSettings.run('n8n_webhook_url', '');
+initSettings.run('n8n_webhook_url', 'https://juaner222-n8n.ajlcmt.easypanel.host/webhook/movimiento-producto');
 initSettings.run('app_name', 'Las Margaritas');
 
 // Crear usuario administrador por defecto si no existe (gaelguapo500@gmail.com / 123456#)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Las Margaritas — Inventario Premium</title>
+    <title>Las Rositas — Inventario Premium</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0F6E56">
     <meta name="color-scheme" content="light only">
@@ -20,7 +20,7 @@
       <div class="icon">
         <svg viewBox="0 0 24 24"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>
       </div>
-      <span>Las Margaritas</span>
+      <span>Las Rositas</span>
     </div>
     <nav class="sidebar-nav">
       <button class="nav-item active" onclick="showPage('inventario',this)">
@@ -63,9 +63,9 @@
         <div class="sub" id="page-sub">Gestiona todos tus insumos</div>
       </div>
       <div class="topbar-right">
-        <button class="btn primary" id="btn-action" onclick="openAddProduct()">
+        <button class="btn primary btn-fab" id="btn-action" onclick="openAddProduct()">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Agregar producto
+          <span class="fab-text">Agregar producto</span>
         </button>
       </div>
     </div>
@@ -103,7 +103,9 @@
             <select id="cat-filter" onchange="renderTable()">
               <option value="">Todas las categorías</option>
               <option>Carnes</option><option>Lácteos</option><option>Verduras</option>
-              <option>Bebidas</option><option>Granos</option><option>Especias</option><option>Otros</option>
+              <option>Bebidas</option><option>Granos</option><option>Especias</option>
+              <option>Enlatados</option><option>Cereales</option><option>Procesados</option><option>Empaquetados</option>
+              <option>Otros</option>
             </select>
           </div>
           <div class="filter-bar">
@@ -218,6 +220,14 @@
             </div>
           </div>
         </div>
+        
+        <!-- Botón de Cerrar Sesión (Especialmente útil en móviles donde el menú lateral inferior no tiene espacio) -->
+        <div style="margin-top: 30px; text-align: center;">
+          <button class="btn danger" onclick="logout()" style="padding: 12px 24px; font-size: 14px; width: 100%; max-width: 300px; justify-content: center;">
+            <svg viewBox="0 0 24 24" style="width: 18px; height: 18px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Cerrar Sesión Segura
+          </button>
+        </div>
       </div>
     </div>
   </main>
@@ -236,7 +246,9 @@
         <label>Categoría</label>
         <select id="f-cat">
           <option>Carnes</option><option>Lácteos</option><option>Verduras</option>
-          <option>Bebidas</option><option>Granos</option><option>Especias</option><option>Otros</option>
+          <option>Bebidas</option><option>Granos</option><option>Especias</option>
+          <option>Enlatados</option><option>Cereales</option><option>Procesados</option><option>Empaquetados</option>
+          <option>Otros</option>
         </select>
       </div>
       <div class="field">
@@ -318,14 +330,14 @@
       <div class="sidebar-logo" style="justify-content:center; padding:0; border:none; margin-bottom:12px;">
         <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
       </div>
-      <h2 style="font-size:22px; font-weight:800; color:var(--green-dark);">Las Margaritas</h2>
+      <h2 style="font-size:22px; font-weight:800; color:var(--green-dark);">Las Rositas</h2>
       <h3 style="font-size:16px; font-weight:600; margin-top:8px;">Iniciar Sesión</h3>
       <p style="font-size:13px; color:var(--gray-text); margin-top:4px;">Ingresa tus credenciales para continuar</p>
     </div>
     <form id="login-form" onsubmit="handleLogin(event)">
       <div class="field">
         <label>Usuario</label>
-        <input type="text" id="login-user" required placeholder="admin" autocapitalize="none" autocorrect="off" spellcheck="false">
+        <input type="text" id="login-user" required placeholder="gaelguapo500@gmail.com" autocapitalize="none" autocorrect="off" spellcheck="false">
       </div>
       <div class="field">
         <label>Contraseña</label>
