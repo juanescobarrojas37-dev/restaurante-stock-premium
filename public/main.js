@@ -9,6 +9,7 @@ let auditLogs = [];
 let settings  = { n8n_webhook_url: '', app_name: 'Las Rositas' };
 let editId = null;
 let currentPage = 'inventario';
+let alertsDismissed = false;
 
 // ── AUTH ──────────────────────────────────────────────────────────────────
 function checkAuth() {
@@ -132,8 +133,13 @@ function renderMetrics() {
   document.getElementById('m-warn').textContent  = warn;
   document.getElementById('m-crit').textContent  = crit;
   const tot = warn + crit;
-  document.getElementById('badge-alertas').textContent = tot;
-  document.getElementById('badge-alertas').style.display = tot ? 'inline-block' : 'none';
+  
+  if (alertsDismissed) {
+    document.getElementById('badge-alertas').style.display = 'none';
+  } else {
+    document.getElementById('badge-alertas').textContent = tot;
+    document.getElementById('badge-alertas').style.display = tot ? 'inline-block' : 'none';
+  }
 }
 
 function getStatus(p) {
@@ -193,6 +199,11 @@ function renderMovements() {
 function renderAlerts() {
   const alertList = document.getElementById('alert-list');
   if (!alertList) return;
+  
+  if (alertsDismissed) {
+    alertList.innerHTML = '<div class="empty" style="color:var(--gray-text);">Las alertas han sido borradas de la vista temporalmente.</div>';
+    return;
+  }
   
   const alerts = products.filter(p => getStatus(p) !== 'ok').sort((a,b) => a.stock - b.stock);
   if (alerts.length === 0) {
@@ -476,11 +487,19 @@ function updateN8nUI() {
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function showToast(msg) {
+function showToast(msg, color) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show';
-  setTimeout(() => t.classList.remove('show'), 2000);
+  if (color === 'green') t.style.background = '#1D9E75';
+  else t.style.background = '#333';
+  setTimeout(() => { t.classList.remove('show'); t.style.background = '#333'; }, 2000);
+}
+
+function clearAlerts() {
+  alertsDismissed = true;
+  renderAll();
+  showToast('Alertas borradas de la vista', 'green');
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────

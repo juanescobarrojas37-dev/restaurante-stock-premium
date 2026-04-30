@@ -135,7 +135,10 @@
       <!-- ALERTAS -->
       <div class="page" id="page-alertas">
         <div class="card">
-          <div class="card-header"><h2>Alertas de stock</h2></div>
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Alertas de stock</h2>
+            <button class="btn sm danger" onclick="clearAlerts()">Borrar Alertas</button>
+          </div>
           <div id="alert-list"></div>
         </div>
       </div>
