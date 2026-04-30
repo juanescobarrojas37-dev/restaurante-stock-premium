@@ -1,4 +1,4 @@
-const CACHE_NAME = 'las-rositas-stock-v2';
+const CACHE_NAME = 'las-rositas-stock-v3';
 const urlsToCache = [
   '/',
   '/index.html',
