@@ -1,5 +1,5 @@
 // ── CONFIG ────────────────────────────────────────────────────────────────
-const API_URL = '/api';
+const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') ? 'http://127.0.0.1:3000/api' : '/api';
 let AUTH_TOKEN = sessionStorage.getItem('auth_token');
 
 // ── ESTADO ────────────────────────────────────────────────────────────────
