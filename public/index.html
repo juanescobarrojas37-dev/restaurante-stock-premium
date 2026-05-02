@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Las Rositas — Inventario Premium</title>
+    <title>Las Margaritas — Inventario Premium</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0F6E56">
     <meta name="color-scheme" content="light only">
@@ -20,7 +20,7 @@
       <div class="icon">
         <svg viewBox="0 0 24 24"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>
       </div>
-      <span>Las Rositas</span>
+      <span>Las Margaritas</span>
     </div>
     <nav class="sidebar-nav">
       <button class="nav-item active" onclick="showPage('inventario',this)">
@@ -324,15 +324,15 @@
 </div>
 
 <!-- LOGIN OVERLAY -->
-<div id="login-screen" style="position:fixed; top:0; left:0; right:0; bottom:0; background:var(--gray-bg); z-index:9000; display:flex; align-items:center; justify-content:center;">
-  <div class="card" style="width:360px; padding:32px; box-shadow:var(--shadow);">
+<div id="login-screen" style="position:fixed; top:0; left:0; right:0; bottom:0; background:#000000; z-index:9000; display:flex; align-items:center; justify-content:center;">
+  <div class="card" style="width:360px; padding:32px; background:#0A0A0A; border:1px solid #FF0033; box-shadow: 0 0 20px rgba(255,0,51,0.3);">
     <div style="text-align:center; margin-bottom:24px;">
       <div class="sidebar-logo" style="justify-content:center; padding:0; border:none; margin-bottom:12px;">
         <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
       </div>
-      <h2 style="font-size:22px; font-weight:800; color:var(--green-dark);">Las Rositas</h2>
-      <h3 style="font-size:16px; font-weight:600; margin-top:8px;">Iniciar Sesión</h3>
-      <p style="font-size:13px; color:var(--gray-text); margin-top:4px;">Ingresa tus credenciales para continuar</p>
+      <h2 style="font-size:22px; font-weight:800; color:#FF0033; text-shadow: 0 0 10px #FF0033;">Las Margaritas</h2>
+      <h3 style="font-size:16px; font-weight:600; margin-top:8px; color: white;">Iniciar Sesión</h3>
+      <p style="font-size:13px; color:#A0A0A0; margin-top:4px;">Ingresa tus credenciales para continuar</p>
     </div>
     <form id="login-form" onsubmit="handleLogin(event)">
       <div class="field">
@@ -343,9 +343,9 @@
         <label>Contraseña</label>
         <input type="password" id="login-pass" required placeholder="••••••••">
       </div>
-      <button type="submit" class="btn primary" style="width:100%; justify-content:center; margin-top:16px; padding:12px;">Acceder al Sistema</button>
+      <button type="submit" class="btn primary" style="width:100%; justify-content:center; margin-top:16px; padding:12px; background:#FF0033; border:none; box-shadow: 0 0 10px #FF0033;">Acceder al Sistema</button>
     </form>
-    <p id="login-error" style="color:var(--red); font-size:12px; margin-top:12px; text-align:center; display:none;"></p>
+    <p id="login-error" style="color:#FF0033; font-size:12px; margin-top:12px; text-align:center; display:none;"></p>
   </div>
 </div>
 
